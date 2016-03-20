@@ -66,7 +66,7 @@ interface AndroidCommand {
 
       def result = ''
       output.split('----------').each {
-        if (it.contains(filter)) {
+        if (it.contains('"' + filter + '"')) {
           result += it
         }
       }
