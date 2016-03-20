@@ -16,6 +16,7 @@ import static com.android.SdkConstants.FD_PLATFORMS
 import static com.android.SdkConstants.FD_ADDONS
 import static com.android.SdkConstants.FD_PLATFORM_TOOLS
 import static com.android.SdkConstants.FD_SYSTEM_IMAGES
+import static com.android.SdkConstants.FD_TOOLS
 
 class PackageResolver {
   static void resolve(Project project, File sdk) {
@@ -32,6 +33,7 @@ class PackageResolver {
   final Logger log = Logging.getLogger PackageResolver
   final Project project
   final File sdk
+  final File toolsDir
   final File buildToolsDir
   final File platformToolsDir
   final File platformsDir
@@ -45,6 +47,7 @@ class PackageResolver {
     this.project = project
     this.androidCommand = androidCommand
 
+    toolsDir = new File(sdk, FD_TOOLS)
     buildToolsDir = new File(sdk, FD_BUILD_TOOLS)
     platformToolsDir = new File(sdk, FD_PLATFORM_TOOLS)
     platformsDir = new File(sdk, FD_PLATFORMS)
@@ -58,12 +61,43 @@ class PackageResolver {
   }
 
   def resolve() {
-    resolveBuildTools()
     resolvePlatformTools()
+    resolveSdkTools() // These must come after platform tools as they depend on them.
+    resolveBuildTools()
     resolveCompileVersion()
     resolveSupportLibraryRepository()
     resolvePlayServiceRepository()
     resolveEmulator()
+  }
+
+  def resolveSdkTools() {
+    log.debug "Determining installed SDK tools version..."
+    def installedToolsRevision = getPackageRevision(toolsDir)
+
+    log.debug "Determining latest available SDK tools version..."
+    def toolsInfo = androidCommand.listUpdates 'tools'
+    def match = (toolsInfo =~ /Android SDK Tools, revision ([\d\.]+)/)
+    if (match) {
+      def latestToolsRevision = match[0][1]
+      log.debug "Latest available SDK tools version is $latestToolsRevision."
+
+      installedToolsRevision = installedToolsRevision.replace('.', '') as int
+      latestToolsRevision = latestToolsRevision.replace('.', '') as int
+      if (installedToolsRevision >= latestToolsRevision) {
+        log.lifecycle "Installed SDK tools are up-to-date."
+        return
+      }
+    } else {
+      log.lifecycle "No SDK tools available for update."
+      return
+    }
+
+    log.lifecycle "Updating SDK tools to latest version..."
+
+    def code = androidCommand.update "tools"
+    if (code != 0) {
+      throw new StopExecutionException("SDK tools download failed with code $code.")
+    }
   }
 
   def resolveBuildTools() {
