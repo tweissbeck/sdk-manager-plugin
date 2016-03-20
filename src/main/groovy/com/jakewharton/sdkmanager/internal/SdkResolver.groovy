@@ -89,7 +89,7 @@ class SdkResolver {
   }
 
   def downloadSdk(File target) {
-    log.lifecycle 'Android SDK not found. Downloading...'
+    log.lifecycle "Android SDK not found. Downloading version ${SdkDownload.SDK_VERSION}..."
 
     // Download the SDK zip and extract it.
     downloader.download target
