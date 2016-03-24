@@ -222,21 +222,8 @@ class PackageResolver {
       needsDownload = true
       log.lifecycle "Emulator $emulatorVersion $emulatorArchitecture missing. Downloading..."
     } else {
-      def emulatorPropertiesFile = new File(emulatorDir, 'source.properties')
-      if (!emulatorPropertiesFile.canRead()) {
-        emulatorPropertiesFile = new File(alternativeEmulatorDir, 'source.properties')
-        if (!emulatorPropertiesFile.canRead()) {
-          throw new StopExecutionException('Could not read ' + emulatorPropertiesFile.absolutePath)
-        }
-      }
-
-      def emulatorProperties = new Properties()
-      emulatorProperties.load(new FileInputStream(emulatorPropertiesFile))
-      def emulatorRevision = emulatorProperties.getProperty('Pkg.Revision')
-      if (emulatorRevision == null) {
-        throw new StopExecutionException('Could not get the installed emulator revision for ' +
-            emulatorPackage)
-      }
+      log.debug "Determining installed emulator package version..."
+      def emulatorRevision = getPackageRevision(emulatorDir, alternativeEmulatorDir)
 
       def currentEmulatorInfo = androidCommand.list emulatorPackage
       if (currentEmulatorInfo == null || currentEmulatorInfo.isEmpty()) {
@@ -263,6 +250,25 @@ class PackageResolver {
             "Emulator $emulatorVersion $emulatorArchitecture download failed with code $code.")
       }
     }
+  }
+
+  def getPackageRevision(File[] packageDirs) {
+    // Find the first readable source.properties file in the given directories.
+    def propertiesFileName = 'source.properties'
+    def propertiesFile = packageDirs.collect { new File(it, propertiesFileName) }.find { it.canRead() }
+    if (propertiesFile == null) {
+      throw new StopExecutionException("No readable $propertiesFileName found in any directory of $packageDirs.")
+    }
+
+    def properties = new Properties()
+    properties.load(new FileInputStream(propertiesFile))
+    def revision = properties.getProperty('Pkg.Revision')
+    if (revision == null) {
+      throw new StopExecutionException("Could not read the revision from ${propertiesFile.absolutePath}")
+    }
+
+    log.debug "Found revision $revision in ${propertiesFile.absolutePath}"
+    return revision
   }
 
   def findDependenciesWithGroup(String group) {
