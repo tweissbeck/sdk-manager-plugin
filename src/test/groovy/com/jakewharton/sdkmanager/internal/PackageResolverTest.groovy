@@ -35,6 +35,18 @@ class PackageResolverTest {
     packageResolver = new PackageResolver(project, fixture.sdk, androidCommand)
   }
 
+  @FixtureName("outdated-sdk-tools")
+  @Test public void outdatedSdkToolsDownloaded() {
+    packageResolver.resolveSdkTools()
+    assertThat(androidCommand).containsExactly('list -e', 'update tools')
+  }
+
+  @FixtureName("up-to-date-sdk-tools")
+  @Test public void upToDateSdkToolsRecognized() {
+    packageResolver.resolveSdkTools()
+    assertThat(androidCommand).containsExactly('list -e')
+  }
+
   @FixtureName("up-to-date-build-tools")
   @Test public void upToDateBuildToolsRecognized() {
     project.apply plugin: 'com.android.application'
