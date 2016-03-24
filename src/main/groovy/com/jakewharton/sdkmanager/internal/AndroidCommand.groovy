@@ -8,7 +8,8 @@ import static com.android.SdkConstants.androidCmdName
 
 interface AndroidCommand {
   int update(String filter);
-  String list(String filter);
+  String listAll(String filter);
+  String listUpdates(String filter);
 
   static final class Real implements AndroidCommand {
     final Logger log = Logging.getLogger Real
@@ -45,10 +46,18 @@ interface AndroidCommand {
       return process.waitFor()
     }
 
-    @Override String list(String filter) {
+    @Override String listAll(String filter) {
+      listWithOptions(filter, ['-a', '-e'])
+    }
+
+    @Override String listUpdates(String filter) {
+      listWithOptions(filter, ['-e'])
+    }
+
+    String listWithOptions(String filter, def options) {
       // -a == all
       // -e == extended
-      def cmd = generateCommand('list', ['-a', '-e'])
+      def cmd = generateCommand('list', options)
       def process = new ProcessBuilder(cmd)
           .redirectErrorStream(true)
           .start()

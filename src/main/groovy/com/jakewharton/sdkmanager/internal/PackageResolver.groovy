@@ -225,7 +225,7 @@ class PackageResolver {
       log.debug "Determining installed emulator package version..."
       def emulatorRevision = getPackageRevision(emulatorDir, alternativeEmulatorDir)
 
-      def currentEmulatorInfo = androidCommand.list emulatorPackage
+      def currentEmulatorInfo = androidCommand.listAll emulatorPackage
       if (currentEmulatorInfo == null || currentEmulatorInfo.isEmpty()) {
         throw new StopExecutionException('Could not get the current emulator revision for ' +
             emulatorPackage)
