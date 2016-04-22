@@ -1,36 +1,25 @@
-buildscript {
-  repositories {
-    jcenter()
-    mavenCentral()
-  }
-  
-  dependencies {
-    classpath 'com.bmuschko:gradle-nexus-plugin:2.3.1'
-  }
-}
+group = 'com.tweissbeck.gradle.plugin.sdkmanager'
+version = '1.0.0-SNAPSHOT'
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
-apply plugin: 'com.bmuschko.nexus'
-apply plugin: 'idea'
+apply plugin: 'maven-publish'
 
-sourceSets {
-  acceptanceTest { sourceSet ->
-    sourceSet.java.srcDir file('src/acceptanceTest/java')
-    sourceSet.groovy.srcDir file('src/acceptanceTest/groovy')
-  }
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
 
-idea {
-  module {
-    testSourceDirs += file('src/acceptanceTest/java')
-    testSourceDirs += file('src/acceptanceTest/groovy')
-  }
+sourceSets {
+    acceptanceTest { sourceSet ->
+        sourceSet.java.srcDir file('src/acceptanceTest/java')
+        sourceSet.groovy.srcDir file('src/acceptanceTest/groovy')
+    }
 }
 
 task acceptanceTest(type: Test) {
-  testClassesDir = sourceSets.acceptanceTest.output.classesDir
-  classpath = sourceSets.acceptanceTest.runtimeClasspath
+    testClassesDir = sourceSets.acceptanceTest.output.classesDir
+    classpath = sourceSets.acceptanceTest.runtimeClasspath
 }
 
 acceptanceTest.mustRunAfter project.tasks.findByName('test')
@@ -39,72 +28,63 @@ acceptanceTest.group = JavaBasePlugin.VERIFICATION_GROUP
 
 check.dependsOn acceptanceTest
 
+/* Maven publish configuration */
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId 'gradle-plugin'
+            /** Modify pom */
+            pom.withXml {
+                asNode().appendNode('description',
+                        'Gradle plugin which downloads and manages your Android SDK.')
+                Node scm = asNode().appendNode('scm')
+                scm.appendNode('url', 'https://github.com/tweissbeck/sdk-manager-plugin')
+                scm.appendNode('connection', 'scm:git:git://github.com/tweissbeck/sdk-manager-plugin.git')
+                scm.appendNode('developerConnection', 'scm:git:ssh://git@github.com/tweissbeck/sdk-manager-plugin.git')
+
+                Node licenses = asNode().appendNode('licenses')
+                Node license = licenses.appendNode('license')
+                license.appendNode('name', 'The Apache Software License, Version 2.0')
+                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
+                license.appendNode('distribution', 'repo')
+
+                Node developers = asNode().appendNode('developers')
+                def appendDev = { Node parent, String id, String name, String email ->
+                    Node developer = new Node(parent, 'developer')
+                    developer.appendNode('id', id)
+                    developer.appendNode('name', name)
+                    developer.appendNode('email', email)
+                    return developer
+                }
+
+                appendDev(developers, 'jakewharton', 'Jake Wharton', 'jakewharton@gmail.com')
+                appendDev(developers, 'tweissbeck', 'Thierry Weissbeck', 'thierry.weissbeck+github@gmail.com')
+
+            }
+
+            /** This adds groovy files too (groovy plugin) */
+            from components.java
+        }
+    }
+}
+
 dependencies {
-  repositories {
-    mavenCentral()
-  }
-
-  compile gradleApi()
-  compile localGroovy()
-  compile 'com.android.tools.build:gradle:1.5.0'
-  compile 'org.rauschig:jarchivelib:0.6.0'
-  compile 'commons-io:commons-io:2.4'
-
-  testCompile 'org.easytesting:fest-assert-core:2.0M10'
-
-  acceptanceTestCompile sourceSets.main.output
-  acceptanceTestCompile sourceSets.test.output
-  acceptanceTestCompile configurations.testCompile
-  acceptanceTestRuntime configurations.testRuntime
-}
-
-group = 'com.jakewharton.sdkmanager'
-version = '1.5.0-SNAPSHOT'
-
-install {
-  repositories.mavenInstaller {
-    pom.artifactId = 'gradle-plugin'
-  }
-}
-
-uploadArchives {
-  repositories.mavenDeployer {
-    pom.artifactId = 'gradle-plugin'
-  }
-}
-
-modifyPom {
-  project {
-    name 'SDK Manager'
-    description 'Gradle plugin which downloads and manages your Android SDK.'
-    url 'https://github.com/JakeWharton/sdk-manager-plugin'
-    inceptionYear '2014'
-
-    scm {
-      url 'https://github.com/JakeWharton/sdk-manager-plugin'
-      connection 'scm:git:git://github.com/JakeWharton/sdk-manager-plugin.git'
-      developerConnection 'scm:git:ssh://git@github.com/JakeWharton/sdk-manager-plugin.git'
+    repositories {
+        mavenLocal()
+        mavenCentral()
     }
 
-    licenses {
-      license {
-        name 'The Apache Software License, Version 2.0'
-        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-        distribution 'repo'
-      }
-    }
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.android.tools.build:gradle:1.5.0'
+    compile 'org.rauschig:jarchivelib:0.6.0'
+    compile 'commons-io:commons-io:2.4'
 
-    developers {
-      developer {
-        id 'jakewharton'
-        name 'Jake Wharton'
-        email 'jakewharton@gmail.com'
-      }
-    }
-  }
+    testCompile 'org.easytesting:fest-assert-core:2.0M10'
+
+    acceptanceTestCompile sourceSets.main.output
+    acceptanceTestCompile sourceSets.test.output
+    acceptanceTestCompile configurations.testCompile
+    acceptanceTestRuntime configurations.testRuntime
 }
 
-task wrapper(type: Wrapper) {
-  gradleVersion = '2.10'
-  distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
-}
