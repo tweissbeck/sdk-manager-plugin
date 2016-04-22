@@ -34,6 +34,9 @@ of these components prior to using this plugin.*
 Usage
 -----
 
+The simplest way to get this plugin is to download the project and publising it on your local/compagny maven repo.
+The version released at maven central is not up to date.
+
 Apply the plugin in your `build.gradle` *before* the regular 'android' plugin:
 ```groovy
 buildscript {
@@ -42,7 +45,7 @@ buildscript {
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:0.12.+'
-    classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.+'
+    classpath 'plugin current group id and version'
   }
 }
 
