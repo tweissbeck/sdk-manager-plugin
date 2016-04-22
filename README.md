@@ -34,9 +34,9 @@ of these components prior to using this plugin.*
 Usage
 -----
 
-The simplest way to get this plugin is to download the project and publising it on your local/compagny maven repo.
+The simplest way to get this plugin is to download the project and publishing it on your local/compagny maven repo.
 The version released at maven central is not up to date.
-Maven publish plugin in build.gradle allow to custoomize the publish repository. Adding a remote repo unlock a new publishing task.
+Use the maven publish plugin in build.gradle to custoomize the publish repository.
 
 Apply the plugin in your `build.gradle` *before* the regular 'android' plugin:
 ```groovy
