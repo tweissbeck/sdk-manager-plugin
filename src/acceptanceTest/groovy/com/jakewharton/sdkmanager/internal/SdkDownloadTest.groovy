@@ -28,7 +28,7 @@ class SdkDownloadTest {
     assertThat(download).doesNotExist()
     assertThat(destination).doesNotExist()
 
-    sdkDownload.download destination
+    sdkDownload.download(destination,'24.4.1')
 
     assertThat(download).doesNotExist()
     assertThat(destination).exists()

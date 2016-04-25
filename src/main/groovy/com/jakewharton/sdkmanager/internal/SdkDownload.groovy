@@ -44,7 +44,7 @@ enum SdkDownload {
   }
 
   /** Download the SDK to {@code temp} and extract to {@code dest}. */
-  void download(File dest) {
+  void download(File dest, String SDK_VERSION) {
     def url = "http://dl.google.com/android/android-sdk_r$SDK_VERSION-$suffix.$ext"
     log.debug "Downloading SDK from $url."
 
