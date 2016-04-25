@@ -34,9 +34,9 @@ of these components prior to using this plugin.*
 Usage
 -----
 
-The simplest way to get this plugin is to download the project and publishing it on your local/compagny maven repo.
+The simplest way to get this plugin is to download the project and publishing it on your local/company maven repo.
 The version released at maven central is not up to date.
-Use the maven publish plugin in build.gradle to custoomize the publish repository.
+Use the maven publish plugin in build.gradle to customize the publish repository.
 
 Apply the plugin in your `build.gradle` *before* the regular 'android' plugin:
 ```groovy
@@ -57,6 +57,13 @@ apply plugin: 'com.android.application'
 sdkManager {
   emulatorVersion 'android-19'
   emulatorArchitecture 'armeabi-v7a' // optional, defaults to arm
+}
+
+// Configure the plugin
+ext {
+        // provide sdk version (mandatory)
+        SDK_VERSION = '24.4.1'
+        ...
 }
 ```
 
