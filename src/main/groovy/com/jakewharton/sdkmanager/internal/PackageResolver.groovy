@@ -63,13 +63,13 @@ class PackageResolver {
             log.lifecycle 'Resolving Play service repository.'
             resolvePlayServiceRepository()
         } else {
-            log.lifecycle 'Project do not contains property resolvePlayServiceRepository, D\'ont resolve Play service repository'
+            log.lifecycle 'Project do not contains property resolvePlayServiceRepository, Don\'t resolve Play service repository'
         }
         if (project.hasProperty('resolveEmulator') && project.getProperties().get('resolveEmulator').equals(Boolean.TRUE)) {
             log.lifecycle 'Resolving Emulator'
             resolveEmulator()
         } else {
-            log.lifecycle 'Project do not contains property resolveEmulator, D\'ont resolve Emulator'
+            log.lifecycle 'Project do not contains property resolveEmulator, Don\'t resolve Emulator'
         }
 
     }
